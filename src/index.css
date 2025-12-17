@@ -24,17 +24,17 @@
     width: 90%;
     max-width: 1200px;
     height: 60px;
-    background: var(--glass-bg);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px); /* Safari support */
-    border: 1px solid var(--c-border);
+    background: rgba(255, 255, 255, 0.6); /* More translucent for glass effect */
+    backdrop-filter: blur(24px) saturate(180%); /* Full blur type glass effect */
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.5);
     border-radius: 99px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0 2rem;
-    z-index: 9999; /* Ensure it stays on top */
-    box-shadow: var(--shadow-sm);
+    z-index: 99999; /* Always on top */
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
     will-change: transform;
 }
 
