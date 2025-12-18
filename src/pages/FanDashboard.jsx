@@ -6,14 +6,41 @@ const FanDashboard = () => {
   const categories = ['All', 'Gaming', 'Music', 'Tech', 'Lifestyle']
   const [activeCat, setActiveCat] = useState('All')
 
-  const creators = [
-    { id: 1, name: 'Marques Brownlee', handle: '@mkbhd', category: 'Tech', avatar: '📱', verified: true },
-    { id: 2, name: 'PewDiePie', handle: '@pewdiepie', category: 'Gaming', avatar: '🎮', verified: true },
-    { id: 3, name: 'Taylor Swift', handle: '@taylor', category: 'Music', avatar: '🎤', verified: true },
-    { id: 4, name: 'MrBeast', handle: '@mrbeast', category: 'Lifestyle', avatar: '💰', verified: true },
-    { id: 5, name: 'TenZ', handle: '@tenz', category: 'Gaming', avatar: '🖱️', verified: true },
-    { id: 6, name: 'Casey Neistat', handle: '@casey', category: 'Lifestyle', avatar: '🛹', verified: true },
-  ]
+  const [creators, setCreators] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  React.useEffect(() => {
+    const fetchCreators = async () => {
+        try {
+            const { collection, getDocs, query, where } = await import('firebase/firestore');
+            const { db } = await import('../firebase');
+            
+            const q = query(collection(db, "users"), where("role", "==", "creator"));
+            const snapshot = await getDocs(q);
+            
+            const fetchedCreators = snapshot.docs.map(doc => {
+                const data = doc.data();
+                return {
+                    id: doc.id,
+                    ...data,
+                    name: `${data.firstName} ${data.lastName}`,
+                    category: data.category || 'Lifestyle',
+                    avatar: '🦁',
+                    handle: `@${data.firstName}`.toLowerCase(),
+                    verified: true
+                };
+            });
+            
+            setCreators(fetchedCreators);
+        } catch (error) {
+            console.error("Error fetching creators:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+    
+    fetchCreators();
+  }, []);
 
   const filteredCreators = activeCat === 'All' 
     ? creators 
@@ -25,6 +52,12 @@ const FanDashboard = () => {
       const storedUser = localStorage.getItem('user');
       if (storedUser) setUser(JSON.parse(storedUser));
   }, []);
+
+  if (loading) return (
+    <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="spinner"></div>
+    </div>
+  );
 
   return (
     <DashboardLayout role="fan">

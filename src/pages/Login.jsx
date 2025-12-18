@@ -29,7 +29,8 @@ const Login = () => {
                 // Use a short timeout to prevent hanging if network is blocked
                 const q = query(collection(db, "users"), where("email", "==", email));
                 const fetchPromise = getDocs(q);
-                const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 1500));
+                // Increased timeout to 3.5s for better reliability on slow networks
+                const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 3500));
                 
                 const snapshot = await Promise.race([fetchPromise, timeoutPromise]);
                 
@@ -67,10 +68,10 @@ const Login = () => {
             // 2. Fetch User Role from Firestore with Timeout
             const docRef = doc(db, "users", user.uid);
             
-            // Create a race between fetch and timeout
+            // Create a race between fetch and timeout - Increased to 5s for reliability
             const fetchPromise = getDoc(docRef);
             const timeoutPromise = new Promise((_, reject) => 
-                setTimeout(() => reject(new Error("Request timed out - Please check your network or adblocker")), 1000)
+                setTimeout(() => reject(new Error("Request timed out - Please check your network or adblocker")), 5000)
             );
 
             try {
