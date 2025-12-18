@@ -34,11 +34,14 @@ const ModernLanding = () => {
                     <div className="logo interactive" style={{ cursor: 'pointer', padding: '10px' }}>Giftify.</div>
                 </Magnetic>
                 <div className="nav-links">
-                    <Magnetic strength={0.4}><button className="nav-item interactive">For Creators</button></Magnetic>
-                    <Magnetic strength={0.4}><button className="nav-item interactive">For Fans</button></Magnetic>
                     <Magnetic strength={0.4}>
                         <Link href="/login">
                             <button className="nav-item interactive">Login</button>
+                        </Link>
+                    </Magnetic>
+                    <Magnetic strength={0.4}>
+                        <Link href="/register">
+                            <button className="nav-item interactive">Register</button>
                         </Link>
                     </Magnetic>
                     <Magnetic strength={0.6}><button className="btn-small interactive">Get Started</button></Magnetic>
@@ -259,8 +262,7 @@ const ModernLanding = () => {
                     <div className="footer-links">
                         <h4>Platform</h4>
                         <ul>
-                            <li><a href="#">For Creators</a></li>
-                            <li><a href="#">For Fans</a></li>
+
                             <li><a href="#">Enterprise</a></li>
                             <li><a href="#">Pricing</a></li>
                         </ul>
