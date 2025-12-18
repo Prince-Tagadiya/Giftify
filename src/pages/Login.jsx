@@ -13,7 +13,7 @@ const Login = () => {
 
     const [email, setEmail] = useState('');
     const [detectedRole, setDetectedRole] = useState(null);
-    
+
     // Real-time role check
     React.useEffect(() => {
         const checkRole = async () => {
@@ -25,15 +25,15 @@ const Login = () => {
             try {
                 const { collection, query, where, getDocs } = await import('firebase/firestore');
                 const { db } = await import('../firebase');
-                
+
                 // Use a short timeout to prevent hanging if network is blocked
                 const q = query(collection(db, "users"), where("email", "==", email));
                 const fetchPromise = getDocs(q);
                 // Increased timeout to 3.5s for better reliability on slow networks
                 const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 3500));
-                
+
                 const snapshot = await Promise.race([fetchPromise, timeoutPromise]);
-                
+
                 if (!snapshot.empty) {
                     setDetectedRole(snapshot.docs[0].data().role);
                 } else {
@@ -57,70 +57,35 @@ const Login = () => {
         const data = Object.fromEntries(formData.entries());
 
         try {
-            const { signInWithEmailAndPassword } = await import('firebase/auth');
-            const { doc, getDoc } = await import('firebase/firestore');
-            const { auth, db } = await import('../firebase');
+            const { login } = await import('../services/auth');
 
-            // 1. Sign In
-            const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
-            const user = userCredential.user;
+            const userData = await login(data.email, data.password);
 
-            // 2. Fetch User Role from Firestore with Timeout
-            const docRef = doc(db, "users", user.uid);
-            
-            // Create a race between fetch and timeout - Increased to 5s for reliability
-            const fetchPromise = getDoc(docRef);
-            const timeoutPromise = new Promise((_, reject) => 
-                setTimeout(() => reject(new Error("Request timed out - Please check your network or adblocker")), 5000)
-            );
+            // Save complete user info locally for dashboards
+            localStorage.setItem('user', JSON.stringify({
+                ...userData
+            }));
 
-            try {
-                const docSnap = await Promise.race([fetchPromise, timeoutPromise]);
-                
-                if (docSnap.exists()) {
-                    const userData = docSnap.data();
-                    localStorage.setItem('user', JSON.stringify({ uid: user.uid, ...userData }));
-                    addToast(`Welcome back, ${userData.firstName}!`, 'success');
-                    
-                    if (userData.role === 'creator') setLocation('/dashboard/creator');
-                    else setLocation('/dashboard/fan');
-                    return;
-                }
-            } catch (timeoutErr) {
-                // If auth worked but DB timed out, fallback to limited mode
-                console.warn("Firestore timed out, falling back to limited mode");
-                
-                // Try to use detected role if available, otherwise default
-                const fallbackRole = detectedRole || 'fan';
-                
-                const limitedUser = {
-                    uid: user.uid,
-                    email: user.email,
-                    firstName: 'User',
-                    lastName: '',
-                    role: fallbackRole,
-                    isLimitedMode: true
-                };
-                
-                localStorage.setItem('user', JSON.stringify(limitedUser));
-                addToast("Network restrictions detected. Entering Limited Mode.", 'info');
-                setLocation(fallbackRole === 'creator' ? '/dashboard/creator' : '/dashboard/fan');
-                return;
+            addToast(`Welcome back, ${userData.firstName}!`, 'success');
+
+            // Redirect based on role
+            if (userData.role === 'creator') {
+                setLocation('/dashboard/creator');
+            } else {
+                setLocation('/dashboard/fan');
             }
-
-            throw new Error("Profile not found in database.");
 
         } catch (err) {
             console.error("Login Error Details:", err);
-            
+
             let message = `Login failed: ${err.message}`;
-            
-            if (err.message && (err.message.includes("Failed to fetch") || err.message.includes("timed out"))) {
-                message = "Network Error: Please disable McAfee WebAdvisor or other Antivirus extensions for this site.";
+
+            if (err.message && (err.message.includes("Failed to fetch") || err.message.includes("timed out") || err.message.includes("network"))) {
+                message = "Network Error: Check your connection.";
             } else if (err.code === 'auth/invalid-credential') {
                 message = "Invalid email or password.";
-            } else if (err.code === 'unavailable') {
-                message = "Service unavailable. Check your internet connection.";
+            } else if (err.code === 'auth/invalid-api-key') {
+                message = 'Configuration Error: Invalid Firebase API Key.';
             }
 
             addToast(message, 'error');
@@ -170,24 +135,24 @@ const Login = () => {
                     <form style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }} onSubmit={handleLogin}>
                         <div>
                             <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, fontSize: '0.9rem' }}>Email</label>
-                            <input 
-                                type="email" 
-                                name="email" 
-                                placeholder="you@example.com" 
-                                className="newsletter-input" 
-                                required 
+                            <input
+                                type="email"
+                                name="email"
+                                placeholder="you@example.com"
+                                className="newsletter-input"
+                                required
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                             />
                             {detectedRole && (
-                                <motion.div 
+                                <motion.div
                                     initial={{ opacity: 0, height: 0 }}
                                     animate={{ opacity: 1, height: 'auto' }}
-                                    style={{ 
-                                        display: 'flex', 
-                                        alignItems: 'center', 
-                                        gap: '6px', 
-                                        marginTop: '8px', 
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '6px',
+                                        marginTop: '8px',
                                         fontSize: '0.85rem',
                                         color: detectedRole === 'creator' ? '#16A34A' : '#2563EB',
                                         fontWeight: 600,

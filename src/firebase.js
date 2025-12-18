@@ -14,8 +14,7 @@ const firebaseConfig = {
 };
 
 if (!firebaseConfig.apiKey) {
-    console.error("Firebase Config is missing! Check .env file.");
-    alert("Critical Error: Firebase configuration not found. Please check .env file.");
+  console.warn("Firebase Config is missing! Check .env file. Auth features will not work.");
 }
 
 console.log('Firebase Config loaded:', firebaseConfig.projectId);
@@ -28,6 +27,6 @@ export const auth = getAuth(app);
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from "firebase/firestore";
 
 export const db = initializeFirestore(app, {
-    experimentalForceLongPolling: true,
+  experimentalForceLongPolling: true,
 });
 export default app;
