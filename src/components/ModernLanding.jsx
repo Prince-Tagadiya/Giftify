@@ -44,7 +44,11 @@ const ModernLanding = () => {
                             <button className="nav-item interactive">Register</button>
                         </Link>
                     </Magnetic>
-                    <Magnetic strength={0.6}><button className="btn-small interactive">Get Started</button></Magnetic>
+                    <Magnetic strength={0.6}>
+                        <Link href="/register">
+                            <button className="btn-small interactive">Get Started</button>
+                        </Link>
+                    </Magnetic>
                 </div>
             </nav>
 
@@ -83,7 +87,9 @@ const ModernLanding = () => {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.8 }}
                     >
-                        <button className="btn-primary interactive" style={{ background: 'var(--grad-primary)', border: 'none' }}>Start Gifting</button>
+                        <Link href="/register">
+                            <button className="btn-primary interactive" style={{ background: 'var(--grad-primary)', border: 'none' }}>Start Gifting</button>
+                        </Link>
                         <button className="btn-secondary interactive">Watch Demo</button>
                     </motion.div>
                 </div>
