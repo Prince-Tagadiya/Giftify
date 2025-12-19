@@ -113,15 +113,14 @@ const DashboardLayout = ({ children, role = 'fan' }) => {
                         <Link 
                             key={link.path} 
                             href={link.path}
-                        >
-                            <a className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all cursor-pointer ${
+                            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all cursor-pointer ${
                                 isActive 
                                     ? 'bg-blue-50 text-blue-600 font-bold' 
                                     : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-medium'
-                            }`}>
+                            }`}
+                        >
                                 <Icon size={20} className={isActive ? 'text-blue-600' : 'text-slate-400'} />
                                 {link.label}
-                            </a>
                         </Link>
                     )
                 })}

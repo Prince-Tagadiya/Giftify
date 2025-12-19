@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import DashboardLayout from '../components/DashboardLayout'
-import { Search, Filter, Star, Gift, Package, MapPin, CheckCircle, Clock, Truck } from 'lucide-react'
+import { Search, Filter, Star, Gift, Package, MapPin, CheckCircle, Clock, Truck, X } from 'lucide-react'
 import { useToast } from '../components/ToastContext'
 import SendGiftModal from '../components/SendGiftModal'
 import PickupAddressModal from '../components/PickupAddressModal'
