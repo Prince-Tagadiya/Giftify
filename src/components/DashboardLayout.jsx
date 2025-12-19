@@ -68,7 +68,7 @@ const DashboardLayout = ({ children, role = 'fan' }) => {
   const fanLinks = [
     { icon: Home, label: 'Discover', path: '/dashboard/fan' },
     { icon: Gift, label: 'My Gifts', path: '/dashboard/fan/history' },
-    { icon: Heart, label: 'Following', path: '/dashboard/fan/following' },
+    { icon: Heart, label: 'Favorites', path: '/dashboard/fan/favorites' },
     { icon: Settings, label: 'Settings', path: '/dashboard/fan/settings' },
   ]
 

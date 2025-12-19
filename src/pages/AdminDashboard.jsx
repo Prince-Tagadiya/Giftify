@@ -71,6 +71,21 @@ const AdminDashboard = () => {
         }
     };
 
+    const handleVerifyUser = async (userId, currentStatus) => {
+        try {
+            const { doc, updateDoc } = await import('firebase/firestore');
+            const { db } = await import('../firebase');
+            
+            await updateDoc(doc(db, "users", userId), { verified: !currentStatus });
+            
+            fetchUsers();
+            addToast(`User ${!currentStatus ? 'verified' : 'unverified'}`, 'success');
+        } catch (error) {
+            console.error("Verify error", error);
+            addToast('Error updating verification', 'error');
+        }
+    };
+
     const fans = users.filter(u => u.role === 'fan');
     const creators = users.filter(u => u.role === 'creator');
 
@@ -99,7 +114,9 @@ const AdminDashboard = () => {
                     bgColor="bg-emerald-50"
                     onRoleChange={handleRoleChange}
                     onDelete={handleDeleteUser}
+                    onVerify={handleVerifyUser}
                     targetRole="fan"
+                    showVerify={true}
                 />
 
                 {/* Fans Section */}
@@ -118,7 +135,7 @@ const AdminDashboard = () => {
     )
 }
 
-const UserTable = ({ title, users, icon, color, bgColor, onRoleChange, onDelete, targetRole }) => (
+const UserTable = ({ title, users, icon, color, bgColor, onRoleChange, onDelete, onVerify, targetRole, showVerify }) => (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="p-6 border-b border-slate-100 flex justify-between items-center">
             <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
@@ -137,6 +154,7 @@ const UserTable = ({ title, users, icon, color, bgColor, onRoleChange, onDelete,
                             <th className="p-4 font-bold">Name</th>
                             <th className="p-4 font-bold">Email</th>
                             <th className="p-4 font-bold">Role</th>
+                            {showVerify && <th className="p-4 font-bold">Verified</th>}
                             <th className="p-4 font-bold text-right">Actions</th>
                         </tr>
                     </thead>
@@ -150,6 +168,16 @@ const UserTable = ({ title, users, icon, color, bgColor, onRoleChange, onDelete,
                                         {user.role}
                                     </span>
                                 </td>
+                                {showVerify && (
+                                    <td className="p-4">
+                                        <button 
+                                            onClick={() => onVerify(user.id, user.verified)}
+                                            className={`px-3 py-1 rounded-full text-xs font-bold transition-colors ${user.verified ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-400'}`}
+                                        >
+                                            {user.verified ? 'Verified' : 'Unverified'}
+                                        </button>
+                                    </td>
+                                )}
                                 <td className="p-4 text-right flex justify-end gap-2">
                                     <button 
                                         onClick={() => onRoleChange(user.id, targetRole)}

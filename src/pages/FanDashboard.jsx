@@ -16,6 +16,7 @@ const FanDashboard = () => {
   const [loadingGifts, setLoadingGifts] = useState(true);
   
   const [sendModalOpen, setSendModalOpen] = useState(false);
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [pickupModalOpen, setPickupModalOpen] = useState(false);
   const [selectedCreator, setSelectedCreator] = useState(null);
   const [selectedRequest, setSelectedRequest] = useState(null);
@@ -228,11 +229,11 @@ const FanDashboard = () => {
                     <button 
                         onClick={() => {
                             setSelectedCreator(creator);
-                            setSendModalOpen(true);
+                            setDetailModalOpen(true);
                         }}
                         className="w-full py-2.5 bg-blue-50 text-blue-600 rounded-xl font-bold flex items-center justify-center gap-2 group-hover:bg-blue-600 group-hover:text-white transition-colors"
                     >
-                        <Gift size={18} /> Send Gift
+                        <Eye size={18} /> View Profile
                     </button>
                 </div>
             ))
@@ -266,9 +267,110 @@ const FanDashboard = () => {
             />
         )}
 
+        {detailModalOpen && selectedCreator && (
+            <CreatorDetailModal 
+                creator={selectedCreator}
+                onClose={() => setDetailModalOpen(false)}
+                onSendGift={() => {
+                    setDetailModalOpen(false);
+                    setSendModalOpen(true);
+                }}
+            />
+        )}
+
     </DashboardLayout>
   )
 }
+
+const CreatorDetailModal = ({ creator, onClose, onSendGift }) => {
+    return (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-white rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 relative">
+                <button onClick={onClose} className="absolute right-4 top-4 bg-black/20 hover:bg-black/40 text-white rounded-full p-2 z-10 transition-colors">
+                    <X size={20} />
+                </button>
+                
+                {/* Cover Image Stub */}
+                <div className="h-48 bg-gradient-to-r from-blue-500 to-indigo-600 w-full relative">
+                    <div className="absolute -bottom-16 left-8">
+                        <div className="w-32 h-32 bg-white rounded-full p-1.5 shadow-lg">
+                            <div className="w-full h-full bg-slate-100 rounded-full flex items-center justify-center text-6xl">
+                                {creator.avatar}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="pt-20 px-8 pb-8">
+                    <div className="flex justify-between items-start mb-6">
+                        <div>
+                            <h2 className="text-3xl font-extrabold text-slate-900 flex items-center gap-2">
+                                {creator.name}
+                                {creator.verified && <CheckCircle size={24} className="text-blue-500" fill="currentColor" color="white" />}
+                            </h2>
+                            <p className="text-slate-500 font-medium text-lg">{creator.handle}</p>
+                            <div className="flex gap-2 mt-3">
+                                {creator.profile?.categories?.map(cat => (
+                                    <span key={cat} className="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-bold uppercase tracking-wide">
+                                        {cat}
+                                    </span>
+                                ))}
+                                {!creator.profile?.categories?.length && (
+                                     <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-bold uppercase tracking-wide">
+                                        {creator.category}
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                        <button 
+                            onClick={onSendGift}
+                            className="px-8 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all flex items-center gap-2 hover:-translate-y-1"
+                        >
+                            <Gift size={20} /> Send Gift
+                        </button>
+                    </div>
+
+                    <div className="space-y-6">
+                        <div>
+                            <h3 className="text-sm font-bold text-slate-900 uppercase tracking-widest mb-3">About</h3>
+                            <p className="text-slate-600 leading-relaxed text-lg">
+                                {creator.profile?.bio || "Hey! I'm a content creator who loves unboxing gifts from my fans. Send me something cool via Giftify!"}
+                            </p>
+                        </div>
+
+                        {creator.profile?.socials && (
+                           <div>
+                                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-widest mb-3">Socials</h3>
+                                <div className="flex gap-4">
+                                    {creator.profile.socials.twitter && (
+                                        <a href={`https://twitter.com/${creator.profile.socials.twitter}`} target="_blank" className="flex items-center gap-2 text-slate-500 hover:text-blue-400 transition-colors font-medium">
+                                            Twitter
+                                        </a>
+                                    )}
+                                    {creator.profile.socials.instagram && (
+                                        <a href={`https://instagram.com/${creator.profile.socials.instagram}`} target="_blank" className="flex items-center gap-2 text-slate-500 hover:text-pink-500 transition-colors font-medium">
+                                            Instagram
+                                        </a>
+                                    )}
+                                </div>
+                           </div>
+                        )}
+                        
+                        <div className="p-4 bg-amber-50 rounded-xl border border-amber-100 flex items-start gap-3">
+                             <div className="bg-amber-100 p-2 rounded-lg text-amber-600"><Star size={20} /></div>
+                             <div>
+                                 <h4 className="font-bold text-amber-900">Wishlist Highlights</h4>
+                                 <p className="text-amber-800 text-sm mt-1">Check out {creator.name}'s items to see what they really need!</p>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+import { Eye } from 'lucide-react'
 
 export default FanDashboard
 

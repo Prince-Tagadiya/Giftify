@@ -64,7 +64,18 @@ const SendGiftModal = ({ creator, onClose, user, onSuccess }) => {
                 }
             };
 
-            await addDoc(collection(db, "gift_requests"), giftRequest);
+            const requestRef = await addDoc(collection(db, "gift_requests"), giftRequest);
+
+            // Create Notification for the Creator
+            await addDoc(collection(db, "notifications"), {
+                userId: creator.id,
+                title: "New Gift Request! 🎁",
+                message: `${user.firstName} wants to send you a ${formData.itemName}`,
+                read: false,
+                type: 'gift_request',
+                relatedId: requestRef.id,
+                createdAt: serverTimestamp()
+            });
             
             addToast("Gift Request Sent! Wait for approval.", "success");
             if (onSuccess) onSuccess();
