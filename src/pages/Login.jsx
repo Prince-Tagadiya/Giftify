@@ -58,6 +58,68 @@ const Login = () => {
         const formData = new FormData(e.target);
         const data = Object.fromEntries(formData.entries());
 
+        // ---------------------------------------------------------
+        // DEMO / FAKE LOGIN BYPASS (For seeded data)
+        // ---------------------------------------------------------
+        const DEMO_PASSWORDS = {
+            'logistics@giftify.com': 'logistics123',
+            'fan@giftify.com': 'fan123',
+            'samay@giftify.com': 'samay123' // Specific request
+        };
+
+        // Allow simple password 'password123' for any seeded user
+        const isGenericDemoPass = data.password === 'password123';
+        const isSpecificDemoPass = DEMO_PASSWORDS[data.email] === data.password;
+        
+        // Special Master Admin Bypass
+        if (data.email === 'admin@giftify.com' && data.password === 'admin123') {
+             const adminUser = { uid: 'admin_master_1', email: 'admin@giftify.com', firstName: 'Admin', lastName: 'Master', role: 'admin', verified: true };
+             localStorage.setItem('user', JSON.stringify(adminUser));
+             addToast("Welcome Master Admin", "success");
+             setLocation('/dashboard/admin');
+             return;
+        }
+
+        if (isGenericDemoPass || isSpecificDemoPass || data.email.includes('@giftify.com')) {
+             try {
+                // Check if this user exists in Firestore directly
+                const { collection, query, where, getDocs } = await import('firebase/firestore');
+                const { db } = await import('../firebase');
+                
+                const q = query(collection(db, "users"), where("email", "==", data.email));
+                const snapshot = await getDocs(q);
+
+                if (!snapshot.empty) {
+                    const userData = snapshot.docs[0].data();
+                    const uid = snapshot.docs[0].id;
+                    
+                    // Verify password logic (Simplistic for demo)
+                    // If it's in our specific list, check match. 
+                    // If it's generic 'password123', allow it.
+                    // If it's a creators email (contains name) allow 'creator123' or 'password123'
+                    
+                    let isValid = false;
+                    if (isGenericDemoPass) isValid = true;
+                    if (isSpecificDemoPass) isValid = true;
+                    if (data.password === 'creator123' && userData.role === 'creator') isValid = true;
+                    if (data.password === 'fan123' && userData.role === 'fan') isValid = true;
+                    if (data.password === 'logistics123' && userData.role === 'admin') isValid = true;
+
+                    if (isValid) {
+                        localStorage.setItem('user', JSON.stringify({ uid, ...userData }));
+                        addToast(`Welcome Demo User: ${userData.firstName}`, "success");
+                        if (userData.role === 'creator') setLocation('/dashboard/creator');
+                        else if (userData.role === 'admin') setLocation('/dashboard/logistics');
+                        else setLocation('/dashboard/fan');
+                        return;
+                    }
+                }
+             } catch(e) {
+                 console.warn("Demo login check failed", e);
+             }
+        }
+        // ---------------------------------------------------------
+
         try {
             const { signInWithEmailAndPassword } = await import('firebase/auth');
             const { doc, getDoc } = await import('firebase/firestore');

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useLocation } from 'wouter'
 import { motion } from 'framer-motion'
-import { Home, Gift, Settings, LogOut, User, Heart, Package, Truck, CheckCircle, Bell, X } from 'lucide-react'
+import { Home, Gift, Settings, LogOut, User, Heart, Package, Truck, CheckCircle, Bell, X, Shield } from 'lucide-react'
 
 const DashboardLayout = ({ children, role = 'fan' }) => {
   const [location] = useLocation()
@@ -64,6 +64,31 @@ const DashboardLayout = ({ children, role = 'fan' }) => {
       fetchNotifs();
       return () => unsubscribe && unsubscribe();
   }, [user]);
+
+  const markAsRead = async (id) => {
+      try {
+          const { doc, updateDoc } = await import('firebase/firestore');
+          const { db } = await import('../firebase');
+          await updateDoc(doc(db, "notifications", id), { read: true });
+      } catch(e) { console.error("Read error", e); }
+  };
+
+  const markAllAsRead = async () => {
+      try {
+          const { doc, writeBatch, collection, getDocs, query, where } = await import('firebase/firestore');
+          const { db } = await import('../firebase');
+          const batch = writeBatch(db);
+          
+          const q = query(collection(db, "notifications"), where("userId", "==", user.uid), where("read", "==", false));
+          const snaps = await getDocs(q);
+          
+          snaps.docs.forEach(d => {
+              batch.update(doc(db, "notifications", d.id), { read: true });
+          });
+          
+          await batch.commit();
+      } catch(e) { console.error("Batch read error", e); }
+  };
 
   const fanLinks = [
     { icon: Home, label: 'Discover', path: '/dashboard/fan' },
@@ -148,6 +173,8 @@ const DashboardLayout = ({ children, role = 'fan' }) => {
                     Sign Out
                 </button>
             </Link>
+
+
         </div>
       </motion.aside>
 
@@ -198,7 +225,11 @@ const DashboardLayout = ({ children, role = 'fan' }) => {
                                      </div>
                                  ) : (
                                      notifications.map(notif => (
-                                         <div key={notif.id} className={`p-4 border-b border-slate-50 hover:bg-slate-50 transition-colors ${!notif.read ? 'bg-blue-50/30' : ''}`}>
+                                         <div 
+                                            key={notif.id} 
+                                            onClick={() => markAsRead(notif.id)}
+                                            className={`p-4 border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer ${!notif.read ? 'bg-blue-50/30' : ''}`}
+                                         >
                                              <div className="flex gap-3">
                                                  <div className={`mt-1 w-2 h-2 rounded-full flex-shrink-0 ${!notif.read ? 'bg-blue-500' : 'bg-slate-200'}`}></div>
                                                  <div>
@@ -215,7 +246,7 @@ const DashboardLayout = ({ children, role = 'fan' }) => {
                              </div>
                              {notifications.length > 0 && (
                                 <div className="p-2 bg-slate-50 border-t border-slate-100 text-center">
-                                    <button className="text-xs font-bold text-blue-600 hover:text-blue-700">Mark all as read</button>
+                                    <button onClick={markAllAsRead} className="text-xs font-bold text-blue-600 hover:text-blue-700">Mark all as read</button>
                                 </div>
                              )}
                         </div>

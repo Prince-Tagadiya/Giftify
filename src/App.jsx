@@ -6,7 +6,8 @@ import Register from './pages/Register'
 import FanDashboard from './pages/FanDashboard'
 import CreatorDashboard from './pages/CreatorDashboard'
 import AdminDashboard from './pages/AdminDashboard'
-import LogisticsDashboard from './pages/LogisticsDashboard' // Added import
+import LogisticsDashboard from './pages/LogisticsDashboard'
+import ResetDB from './pages/ResetDB'
 import ProtectedRoute from './components/ProtectedRoute'
 import { ToastProvider } from './components/ToastContext'
 import './refined_theme.css'
@@ -21,6 +22,7 @@ function App() {
         </Route>
         <Route path="/login" component={Login} />
         <Route path="/register" component={Register} />
+        <Route path="/reset" component={ResetDB} />
         
         {/* Protected Dashboard Routes */}
         <Route path="/dashboard/fan">
@@ -40,7 +42,9 @@ function App() {
         <Route path="/dashboard/creator/:subpage">
             {(params) => <ProtectedRoute component={CreatorDashboard} allowedRole="creator" params={params} />}
         </Route>
-
+        <Route path="/dashboard/logistics/:subpage">
+            {(params) => <ProtectedRoute component={LogisticsDashboard} allowedEmail="logistics@giftify.com" params={params} />}
+        </Route>
 
         <Route>404: No such page!</Route>
       </Switch>

@@ -192,7 +192,6 @@ const Register = () => {
                             <select name="role" className="newsletter-input" style={{ width: '100%' }}>
                                 <option value="fan">Fan (I want to send gifts)</option>
                                 <option value="creator">Creator (I want to receive gifts)</option>
-                                <option value="admin">Logistics Staff (Admin)</option>
                             </select>
                         </div>
 
