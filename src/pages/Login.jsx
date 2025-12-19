@@ -5,11 +5,13 @@ import '../index.css'
 import '../refined_theme.css'
 
 import { useToast } from '../components/ToastContext'
+import { Eye, EyeOff } from 'lucide-react'
 
 const Login = () => {
     const [, setLocation] = useLocation();
     const { addToast } = useToast();
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false); // New State
 
     const [email, setEmail] = useState('');
     const [detectedRole, setDetectedRole] = useState(null);
@@ -82,8 +84,13 @@ const Login = () => {
                     localStorage.setItem('user', JSON.stringify({ uid: user.uid, ...userData }));
                     addToast(`Welcome back, ${userData.firstName}!`, 'success');
                     
-                    if (userData.role === 'creator') setLocation('/dashboard/creator');
-                    else setLocation('/dashboard/fan');
+                    if (userData.role === 'creator') {
+                        setLocation('/dashboard/creator');
+                    } else if (userData.role === 'admin' || user.email === 'logistics@giftify.com') {
+                        setLocation('/dashboard/logistics');
+                    } else {
+                        setLocation('/dashboard/fan');
+                    }
                     return;
                 }
             } catch (timeoutErr) {
@@ -111,7 +118,11 @@ const Login = () => {
 
                 // Less alarming message
                 addToast("Taking longer than usual. Loading offline mode...", 'info');
-                setLocation(fallbackRole === 'creator' ? '/dashboard/creator' : '/dashboard/fan');
+                
+                if (fallbackRole === 'creator') setLocation('/dashboard/creator');
+                else if (fallbackRole === 'admin' || user.email === 'logistics@giftify.com') setLocation('/dashboard/logistics');
+                else setLocation('/dashboard/fan');
+                
                 return;
             }
 
@@ -198,16 +209,16 @@ const Login = () => {
                                         gap: '6px', 
                                         marginTop: '8px', 
                                         fontSize: '0.85rem',
-                                        color: detectedRole === 'creator' ? '#16A34A' : '#2563EB',
+                                        color: detectedRole === 'creator' ? '#16A34A' : (detectedRole === 'admin' ? '#7c3aed' : '#2563EB'),
                                         fontWeight: 600,
-                                        background: detectedRole === 'creator' ? '#DCFCE7' : '#EFF6FF',
+                                        background: detectedRole === 'creator' ? '#DCFCE7' : (detectedRole === 'admin' ? '#f3e8ff' : '#EFF6FF'),
                                         padding: '4px 8px',
                                         borderRadius: '6px',
                                         width: 'fit-content'
                                     }}
                                 >
-                                    <span>{detectedRole === 'creator' ? '🦁' : '🦄'}</span>
-                                    {detectedRole === 'creator' ? 'Creator Account Detected' : 'Fan Account Detected'}
+                                    <span>{detectedRole === 'creator' ? '🦁' : (detectedRole === 'admin' ? '🚚' : '🦄')}</span>
+                                    {detectedRole === 'creator' ? 'Creator Account Detected' : (detectedRole === 'admin' ? 'Logistics Team Detected' : 'Fan Account Detected')}
                                 </motion.div>
                             )}
                         </div>

@@ -5,11 +5,13 @@ import '../index.css'
 import '../refined_theme.css'
 
 import { useToast } from '../components/ToastContext'
+import { Eye, EyeOff } from 'lucide-react'
 
 const Register = () => {
     const [, setLocation] = useLocation();
     const { addToast } = useToast();
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
     const handleRegister = async (e) => {
         e.preventDefault();
@@ -28,7 +30,7 @@ const Register = () => {
             // 1. Create User in Auth with Timeout
             const createPromise = createUserWithEmailAndPassword(auth, data.email, data.password);
             const timeoutPromise = new Promise((_, reject) => 
-                setTimeout(() => reject(new Error("Request timed out - Please check your network or adblocker")), 1000)
+                setTimeout(() => reject(new Error("Request timed out - Please check your network or adblocker")), 10000)
             );
 
             try {
@@ -57,7 +59,7 @@ const Register = () => {
                 
                 // Reuse timeout logic for Firestore write
                 const writeTimeout = new Promise((_, reject) => 
-                    setTimeout(() => reject(new Error("Firestore write timed out")), 5000)
+                    setTimeout(() => reject(new Error("Firestore write timed out")), 10000)
                 );
 
                 await Promise.race([firestorePromise, writeTimeout]);
@@ -154,9 +156,35 @@ const Register = () => {
                             <input type="email" name="email" placeholder="you@example.com" className="newsletter-input" required />
                         </div>
 
+
                         <div>
                             <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, fontSize: '0.9rem' }}>Password</label>
-                            <input type="password" name="password" placeholder="••••••••" className="newsletter-input" required />
+                            <div style={{ position: 'relative' }}>
+                                <input 
+                                    type={showPassword ? "text" : "password"} 
+                                    name="password" 
+                                    placeholder="••••••••" 
+                                    className="newsletter-input" 
+                                    required 
+                                    style={{ width: '100%', paddingRight: '40px' }}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    style={{
+                                        position: 'absolute',
+                                        right: '10px',
+                                        top: '50%',
+                                        transform: 'translateY(-50%)',
+                                        background: 'none',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        color: '#94A3B8'
+                                    }}
+                                >
+                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                </button>
+                            </div>
                         </div>
 
                         <div>
@@ -164,6 +192,7 @@ const Register = () => {
                             <select name="role" className="newsletter-input" style={{ width: '100%' }}>
                                 <option value="fan">Fan (I want to send gifts)</option>
                                 <option value="creator">Creator (I want to receive gifts)</option>
+                                <option value="admin">Logistics Staff (Admin)</option>
                             </select>
                         </div>
 
